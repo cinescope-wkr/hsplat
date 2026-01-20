@@ -183,6 +183,12 @@ def load_2dgs_ckpt(pt_path, ch, viewmat, K, width, height, num_points=None, dev=
         far_plane=200,
     )
 
+      # ---- FIX: gsplat spherical_harmonics expects masks shape (B, N) ----
+    masks = (radii > 0)
+    if masks.ndim == 3:
+        # radii is likely (B, N, 2) for 2DGS; require both components valid
+        masks = masks.all(dim=-1)
+
     camtoworlds = torch.inverse(viewmat[None])
     dirs = samples["means"][None, :, :] - camtoworlds[:, None, :3, 3] # Gaussian ray directions
     
@@ -191,11 +197,11 @@ def load_2dgs_ckpt(pt_path, ch, viewmat, K, width, height, num_points=None, dev=
         logger.info("[opacity]: SH")
         sh_opacities = torch.cat([samples["sh0_opacities"], samples["shN_opacities"]], dim=-2)
         sh_opacities = sh_opacities[None].expand(-1, -1, -1, 3) # [1, N, K, 3], dummy dimension for SH
-        sh_opacity_degree = int(math.sqrt(sh_opacities.shape[-2]) - 1)
+        sh_opacity_degree = int(math.sqrt(sh_opacities.shape[-2]) - 1) # Fix
         
         opacities = spherical_harmonics(
-            sh_opacity_degree, dirs, sh_opacities, masks=radii > 0
-        )  
+            sh_opacity_degree, dirs, sh_opacities, masks=masks
+        )
         opacities = opacities[..., 0] # [C, N]
         
         # Replace key and delete old ones to save memory
@@ -214,8 +220,8 @@ def load_2dgs_ckpt(pt_path, ch, viewmat, K, width, height, num_points=None, dev=
     sh = sh[..., None].expand(-1, -1, 3) # [N, K, 3]
 
     colors = spherical_harmonics(
-        0, dirs, sh.unsqueeze(0), masks=radii > 0
-    )[..., 0].squeeze() # [N]
+        0, dirs, sh.unsqueeze(0), masks=masks
+    )[..., 0].squeeze() # [N] # Fix 
     colors = torch.clamp_min(colors + 0.5, 0.0)
 
     return samples, radii, sh, colors

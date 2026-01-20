@@ -683,6 +683,12 @@ class Gaussians(Primitives):
         D = torch.diag_embed(self.scales ** 2)
         self.cov2ds = J @ R @ D @ R.mT @ J.mT
 
+        cov = self.cov2ds
+        print("cov2ds nan:", torch.isnan(cov).any().item(),
+            "inf:", torch.isinf(cov).any().item(),
+            "min:", cov.min().item(),
+            "max:", cov.max().item())
+
         scales_2d_sq, rotations_2d = torch.linalg.eigh(self.cov2ds)
 
         rotations_3d = torch.zeros((N, 3, 3), device=self.means.device, dtype=self.means.dtype)

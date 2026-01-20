@@ -29,6 +29,8 @@ from propagations import ASM_parallel
 import time
 
 import viz_utils
+from viz_utils import parser
+from viz_utils import visualization
 import json
 
 import utils

@@ -1,0 +1,51 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build artifacts
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+*.so
+*.dylib
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / tooling
+.vscode/
+.idea/
+
+# Logs / temp
+*.log
+*.out
+*.err
+*.tmp
+*.swp
+
+# Models / checkpoints
+*.pth
+*.pt
+*.ckpt
+
+# Project outputs
+hsplat/results/
+gsplat/results/
+
+# data & checkpoints
+data/
+models/**/ckpts/
+models/**/*.pt
+models/**/*.pth
+
+# Misc
+.DS_Store
